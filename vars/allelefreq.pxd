@@ -27,8 +27,9 @@ cdef class AlleleFreq:
     cdef long L,K
     cdef double mintol
     cdef np.ndarray beta, gamma, var_beta, var_gamma, zetabeta, zetagamma, piA, F, mu, Lambda
+    cdef double prior_beta, prior_gamma
     cdef list oldvar_beta, oldvar_gamma
-    cdef str prior 
+    cdef str prior
 
     cdef copy(self)
     cdef require(self)

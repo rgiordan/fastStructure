@@ -841,6 +841,8 @@ struct __pyx_obj_4vars_10allelefreq_AlleleFreq {
   PyArrayObject *F;
   PyArrayObject *mu;
   PyArrayObject *Lambda;
+  double prior_beta;
+  double prior_gamma;
   PyObject *oldvar_beta;
   PyObject *oldvar_gamma;
   PyObject *prior;
@@ -1635,7 +1637,7 @@ static int __pyx_pf_4vars_9admixprop_9AdmixProp___cinit__(struct __pyx_obj_4vars
   /* "vars/admixprop.pyx":27
  * 
  *         # Initializing hyperparameters
- *         self.alpha = 1./K*np.ones((1,K))             # <<<<<<<<<<<<<<
+ *         self.alpha = 1. / K * np.ones((1,K))             # <<<<<<<<<<<<<<
  * 
  *         # Initializing variational parameters for admixture proportions
  */
@@ -1700,8 +1702,8 @@ static int __pyx_pf_4vars_9admixprop_9AdmixProp___cinit__(struct __pyx_obj_4vars
   /* "vars/admixprop.pyx":30
  * 
  *         # Initializing variational parameters for admixture proportions
- *         self.var = np.ones((N,K)) + 0.1*np.random.rand(N,K)             # <<<<<<<<<<<<<<
- *         self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))
+ *         self.var = np.ones((N,K)) + 0.1 * np.random.rand(N,K)             # <<<<<<<<<<<<<<
+ *         self.xi = np.exp(digamma(self.var) - digamma(utils.insum(self.var, [1])))
  *         self.oldvar = []
  */
   __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
@@ -1802,8 +1804,8 @@ static int __pyx_pf_4vars_9admixprop_9AdmixProp___cinit__(struct __pyx_obj_4vars
 
   /* "vars/admixprop.pyx":31
  *         # Initializing variational parameters for admixture proportions
- *         self.var = np.ones((N,K)) + 0.1*np.random.rand(N,K)
- *         self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))             # <<<<<<<<<<<<<<
+ *         self.var = np.ones((N,K)) + 0.1 * np.random.rand(N,K)
+ *         self.xi = np.exp(digamma(self.var) - digamma(utils.insum(self.var, [1])))             # <<<<<<<<<<<<<<
  *         self.oldvar = []
  * 
  */
@@ -1942,8 +1944,8 @@ static int __pyx_pf_4vars_9admixprop_9AdmixProp___cinit__(struct __pyx_obj_4vars
   __pyx_t_1 = 0;
 
   /* "vars/admixprop.pyx":32
- *         self.var = np.ones((N,K)) + 0.1*np.random.rand(N,K)
- *         self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))
+ *         self.var = np.ones((N,K)) + 0.1 * np.random.rand(N,K)
+ *         self.xi = np.exp(digamma(self.var) - digamma(utils.insum(self.var, [1])))
  *         self.oldvar = []             # <<<<<<<<<<<<<<
  * 
  *     cdef copy(self):
@@ -2456,7 +2458,7 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_update(struct __pyx_obj_4va
  *             self.var = self.oldvar[-1]
  *         else:
  *             self.var = self.alpha + self.var             # <<<<<<<<<<<<<<
- *             self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))
+ *             self.xi = np.exp(digamma(self.var) - digamma(utils.insum(self.var, [1])))
  *         self.require()
  */
   /*else*/ {
@@ -2472,7 +2474,7 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_update(struct __pyx_obj_4va
     /* "vars/admixprop.pyx":81
  *         else:
  *             self.var = self.alpha + self.var
- *             self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))             # <<<<<<<<<<<<<<
+ *             self.xi = np.exp(digamma(self.var) - digamma(utils.insum(self.var, [1])))             # <<<<<<<<<<<<<<
  *         self.require()
  * 
  */
@@ -2614,7 +2616,7 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_update(struct __pyx_obj_4va
 
   /* "vars/admixprop.pyx":82
  *             self.var = self.alpha + self.var
- *             self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))
+ *             self.xi = np.exp(digamma(self.var) - digamma(utils.insum(self.var, [1])))
  *         self.require()             # <<<<<<<<<<<<<<
  * 
  *     cdef square_update(self, np.ndarray[np.uint8_t, ndim=2] G, af.AlleleFreq pi):
@@ -3180,7 +3182,7 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_square_update(struct __pyx_
  *             else:
  *                 a_ok = True             # <<<<<<<<<<<<<<
  * 
- *         # if this accelerated step fails for some reason, stick with the first non-accelerated step.
+ *         # if this accelerated step fails for some reason, stick with the first non-accelerated step
  */
     /*else*/ {
       __Pyx_INCREF(Py_True);
@@ -3191,7 +3193,7 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_square_update(struct __pyx_
 
   /* "vars/admixprop.pyx":128
  * 
- *         # if this accelerated step fails for some reason, stick with the first non-accelerated step.
+ *         # if this accelerated step fails for some reason, stick with the first non-accelerated step
  *         if np.isnan(self.var).any():             # <<<<<<<<<<<<<<
  *             self.var = self.oldvar[1]
  * 
@@ -3252,7 +3254,7 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_square_update(struct __pyx_
   if (__pyx_t_10) {
 
     /* "vars/admixprop.pyx":129
- *         # if this accelerated step fails for some reason, stick with the first non-accelerated step.
+ *         # if this accelerated step fails for some reason, stick with the first non-accelerated step
  *         if np.isnan(self.var).any():
  *             self.var = self.oldvar[1]             # <<<<<<<<<<<<<<
  * 
@@ -3273,7 +3275,7 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_square_update(struct __pyx_
 
     /* "vars/admixprop.pyx":128
  * 
- *         # if this accelerated step fails for some reason, stick with the first non-accelerated step.
+ *         # if this accelerated step fails for some reason, stick with the first non-accelerated step
  *         if np.isnan(self.var).any():             # <<<<<<<<<<<<<<
  *             self.var = self.oldvar[1]
  * 

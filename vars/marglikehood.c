@@ -861,6 +861,8 @@ struct __pyx_obj_4vars_10allelefreq_AlleleFreq {
   PyArrayObject *F;
   PyArrayObject *mu;
   PyArrayObject *Lambda;
+  double prior_beta;
+  double prior_gamma;
   PyObject *oldvar_beta;
   PyObject *oldvar_gamma;
   PyObject *prior;

@@ -1,6 +1,6 @@
 
 import numpy as np
-import fastStructure 
+import fastStructure
 import parse_bed
 import parse_str
 import random
@@ -22,6 +22,8 @@ def parseopts(opts):
     params = {'mintol': 1e-6,
             'prior': "simple",
             'cv': 0,
+            'prior_beta': 1.0,
+            'prior_gamma': 1.0,
             'full': False,
             'format': 'bed',
             'starting_values_file': ''
@@ -48,12 +50,18 @@ def parseopts(opts):
                 print "%s prior is not currently implemented, defaulting to the simple prior"
                 params['prior'] = 'simple'
 
+        elif opt in ["--prior_beta"]:
+            params['prior_beta'] = arg
+
+        elif opt in ["--prior_gamma"]:
+            params['prior_gamma'] = arg
+
         elif opt in ["--format"]:
             params['format'] = arg
 
         elif opt in ["--cv"]:
             params['cv'] = int(arg)
-        
+
         elif opt in ["--tol"]:
             params['mintol'] = float(arg)
 
@@ -76,7 +84,7 @@ def checkopts(params):
     if params['mintol']<=0:
         print "a non-positive value was provided as convergence criterion"
         raise ValueError
-    
+
     if params['cv']<0:
         print "a negative value was provided for the number of cross-validations folds"
         raise ValueError
@@ -92,15 +100,15 @@ def checkopts(params):
     if params['K']<=0:
         print "a negative value was provided for the number of populations"
         raise ValueError
-    
+
     if not params.has_key('inputfile'):
         print "an input file needs to be provided"
-        raise KeyError 
+        raise KeyError
 
     if not params.has_key('outputfile'):
         print "an output file needs to be provided"
         raise KeyError
-    
+
 def write_output(Q, P, other, params):
 
     """
@@ -131,7 +139,7 @@ def write_output(Q, P, other, params):
         # handle.close()
 
 def usage():
-    
+
     """
     brief description of various flags and options for this script
     """
@@ -143,6 +151,8 @@ def usage():
     print "\t --output=<file>"
     print "\t --tol=<float> (default: 10e-6)"
     print "\t --prior={simple,logistic} (default: simple)"
+    print "\t --prior_beta=<float> (default: 1.0)"
+    print "\t --prior_gamma=<float> (default: 1.0)"
     print "\t --cv=<int> (default: 0)"
     print "\t --format={bed,str} (default: bed)"
     print "\t --full (to output all variational parameters; optional)"
@@ -156,7 +166,8 @@ if __name__=="__main__":
     argv = sys.argv[1:]
     smallflags = "K:"
     bigflags = ["prior=", "tol=", "input=", "output=", "cv=",
-                "seed=", "format=", "full", "starting_values_file="] 
+                "seed=", "format=", "full", "starting_values_file=",
+                "prior_beta=", "prior_gamma="]
     try:
         opts, args = getopt.getopt(argv, smallflags, bigflags)
         if not opts:
@@ -191,9 +202,9 @@ if __name__=="__main__":
     # run the variational algorithm
     Q, P, other = fastStructure.infer_variational_parameters(G, params['K'], \
                     params['outputfile'], params['mintol'], \
-                    params['prior'], params['cv'], params['starting_values_file'])
+                    params['prior'], params['cv'], params['starting_values_file'],
+                    params['prior_beta'], params['prior_gamma'])
 
 
     # write out inferred parameters
     write_output(Q, P, other, params)
-

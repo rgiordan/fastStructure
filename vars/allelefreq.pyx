@@ -15,19 +15,19 @@ cdef extern from "allelefreq.h":
 
 cdef class AlleleFreq:
 
-    def __cinit__(self, long L, long K, str prior):
+    def __cinit__(self, long L, long K, str prior, double prior_beta=1.0, double prior_gamma=1.0):
 
         """
         Sets initial parameter values for the variational distributions over
-        allele frequencies. 
+        allele frequencies.
         """
 
         self.L = L
         self.K = K
         self.prior = prior
         if self.prior=='simple':
-            self.beta = np.ones((self.L,self.K))
-            self.gamma = np.ones((self.L,self.K))
+            self.beta = np.full((self.L,self.K), prior_beta)
+            self.gamma = np.full((self.L,self.K), prior_gamma)
         elif self.prior=='logistic':
             self.mu = np.zeros((self.L,1))
             self.Lambda = np.ones((self.K,))
@@ -49,7 +49,8 @@ cdef class AlleleFreq:
         """
 
         cdef AlleleFreq newinstance
-        newinstance = AlleleFreq(self.L, self.K, prior=self.prior)
+        newinstance = AlleleFreq(self.L, self.K, prior=self.prior, \
+                                 prior_beta=self.prior_beta, prior_gamma=self.prior_gamma)
         newinstance.var_beta = self.var_beta.copy()
         newinstance.zetabeta = self.zetabeta.copy()
         newinstance.var_gamma = self.var_gamma.copy()
@@ -84,7 +85,7 @@ cdef class AlleleFreq:
         """
         Update parameters of variational distributions over
         allele frequencies, given genotype data and estimates
-        of parameters of variational distributions over admixture 
+        of parameters of variational distributions over admixture
         proportions. This update method is called when the
         ``simple prior'' over allele frequencies is chosen.
 
@@ -143,7 +144,7 @@ cdef class AlleleFreq:
         # use an iterative fixed-point solver to update parameter estimates.
         var_beta, var_gamma = self._unconstrained_solver(Dvarbeta, Dvargamma)
 
-        # if a variable violates positivity constraint, 
+        # if a variable violates positivity constraint,
         # set it to an estimate from the previous update
         bad_beta = reduce(utils.OR,[(var_beta<=0),np.isnan(var_beta)])
         bad_gamma = reduce(utils.OR,[(var_gamma<=0),np.isnan(var_gamma)])
@@ -166,12 +167,12 @@ cdef class AlleleFreq:
         Arguments:
 
             Dvarbeta : numpy.ndarray
-                data-dependent terms relevant for the update of `beta` parameters 
+                data-dependent terms relevant for the update of `beta` parameters
 
             Dvargamma : numpy.ndarray
                 data-dependent terms relevant for the update of `gamma` parameters
 
-        Note: 
+        Note:
             positivity constraints on variables are not explicitly
             enforced in this iterative scheme.
         """

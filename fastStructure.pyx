@@ -13,7 +13,8 @@ from scipy.special import digamma, gammaln, polygamma
 
 def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
                                  str outfile, double mintol, str prior,
-                                 int cv, str starting_values_file):
+                                 int cv, str starting_values_file,
+                                 double prior_beta, double prior_gamma):
 
     cdef int N, L, batch_size, restart, iter
     cdef double Estart, E, Enew, reltol, diff, totaltime, itertime
@@ -72,7 +73,7 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
         raise IndexError
 
       psistart = ap.AdmixProp(N,K)
-      pistart = af.AlleleFreq(L, K, prior)
+      pistart = af.AlleleFreq(L, K, prior, prior_beta, prior_gamma)
 
       # Update pistart's necessary quantities.
       # TODO: I think this should be in a method of AlleleFreq.
@@ -105,7 +106,7 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
                 # iterate the variational algorithm to `weak' convergence
                 # to initialize parameters for admixture proportions
                 psi = ap.AdmixProp(N, K)
-                pi = af.AlleleFreq(batch_size, K, prior)
+                pi = af.AlleleFreq(batch_size, K, prior, prior_beta, prior_gamma)
                 # variational admixture proportion update
                 psi.update(g, pi)
                 # variational allele frequency update
@@ -131,7 +132,7 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
                 # frequency parameters for all SNPs, keeping admixture proportions fixed.
                 # if the logistic prior is chosen, hyperparameter `Lambda`
                 # is also kept fixed in this step.
-                pi = af.AlleleFreq(L, K, prior)
+                pi = af.AlleleFreq(L, K, prior, prior_beta, prior_gamma)
                 if pi.prior=='logistic':
                     pi.Lambda = piG.Lambda.copy()
                     old = [pi.var_beta.copy(), pi.var_gamma.copy()]
@@ -149,7 +150,7 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
 
                 # simple initializing of variational parameters (cold start)
                 psi = ap.AdmixProp(N,K)
-                pi = af.AlleleFreq(L, K, prior)
+                pi = af.AlleleFreq(L, K, prior, prior_beta, prior_gamma)
 
             # compute marginal likelihood for this initialization
             psi.update(G, pi)
@@ -212,7 +213,7 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
                        np.amax(np.abs(psi_var_diff))
               last_pi = pi.copy()
               last_psi = psi.copy()
-              print '    Using parameters for convergence.  Reltol: %0.8f , lik diff %0.8f\n' % (reltol, E_new - E)
+              print '    Using parameters for convergence.  Reltol: %0.16f , lik diff %0.16f\n' % (reltol, E_new - E)
             else:
               reltol = E_new-E
 
