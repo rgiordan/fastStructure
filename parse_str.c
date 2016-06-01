@@ -1860,7 +1860,7 @@ static PyObject *__pyx_pf_9parse_str_load(CYTHON_UNUSED PyObject *__pyx_self, Py
  *         except IndexError:
  *             minor = ''             # <<<<<<<<<<<<<<
  * 
- *         # maps structure represntation of genotypes to an unsigned integer
+ *         # maps structure representation of genotypes to an unsigned integer
  */
         __Pyx_INCREF(__pyx_kp_s__3);
         __Pyx_XDECREF_SET(__pyx_v_minor, __pyx_kp_s__3);
@@ -1896,10 +1896,10 @@ static PyObject *__pyx_pf_9parse_str_load(CYTHON_UNUSED PyObject *__pyx_self, Py
 
     /* "parse_str.pyx":29
  * 
- *         # maps structure represntation of genotypes to an unsigned integer
- *         genomap = { minor+minor : 2,             # <<<<<<<<<<<<<<
- *                     minor+major : 1,
- *                     major+minor : 1,
+ *         # maps structure representation of genotypes to an unsigned integer
+ *         genomap = { minor + minor : 2,             # <<<<<<<<<<<<<<
+ *                     minor + major : 1,
+ *                     major + minor : 1,
  */
     __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 29, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
@@ -1909,11 +1909,11 @@ static PyObject *__pyx_pf_9parse_str_load(CYTHON_UNUSED PyObject *__pyx_self, Py
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
     /* "parse_str.pyx":30
- *         # maps structure represntation of genotypes to an unsigned integer
- *         genomap = { minor+minor : 2,
- *                     minor+major : 1,             # <<<<<<<<<<<<<<
- *                     major+minor : 1,
- *                     major+major : 0
+ *         # maps structure representation of genotypes to an unsigned integer
+ *         genomap = { minor + minor : 2,
+ *                     minor + major : 1,             # <<<<<<<<<<<<<<
+ *                     major + minor : 1,
+ *                     major + major : 0
  */
     __pyx_t_2 = PyNumber_Add(__pyx_v_minor, __pyx_v_major); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
@@ -1921,10 +1921,10 @@ static PyObject *__pyx_pf_9parse_str_load(CYTHON_UNUSED PyObject *__pyx_self, Py
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
     /* "parse_str.pyx":31
- *         genomap = { minor+minor : 2,
- *                     minor+major : 1,
- *                     major+minor : 1,             # <<<<<<<<<<<<<<
- *                     major+major : 0
+ *         genomap = { minor + minor : 2,
+ *                     minor + major : 1,
+ *                     major + minor : 1,             # <<<<<<<<<<<<<<
+ *                     major + major : 0
  *                   }
  */
     __pyx_t_2 = PyNumber_Add(__pyx_v_major, __pyx_v_minor); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
@@ -1933,9 +1933,9 @@ static PyObject *__pyx_pf_9parse_str_load(CYTHON_UNUSED PyObject *__pyx_self, Py
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
     /* "parse_str.pyx":32
- *                     minor+major : 1,
- *                     major+minor : 1,
- *                     major+major : 0             # <<<<<<<<<<<<<<
+ *                     minor + major : 1,
+ *                     major + minor : 1,
+ *                     major + major : 0             # <<<<<<<<<<<<<<
  *                   }
  * 
  */

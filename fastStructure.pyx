@@ -3,9 +3,9 @@ import numpy as np
 cimport numpy as np
 from cpython cimport bool
 import vars.utils as utils
-cimport vars.allelefreq as af 
+cimport vars.allelefreq as af
 import vars.allelefreq as af
-cimport vars.admixprop as ap 
+cimport vars.admixprop as ap
 import vars.admixprop as ap
 import vars.marglikehood as mlhood
 import time
@@ -19,8 +19,8 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
     cdef double Estart, E, Enew, reltol, diff, totaltime, itertime
     cdef np.ndarray g
     cdef list indices, old, Psis, Es, Times
-    cdef ap.AdmixProp psi, psistart
-    cdef af.AlleleFreq pi, pistart, piG
+    cdef ap.AdmixProp psi, psistart, last_psi
+    cdef af.AlleleFreq pi, pistart, piG, last_pi
 
     totaltime = time.time()
     N = G.shape[0]
@@ -53,23 +53,23 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
       var_q_handle = open(starting_values_file + '.varQ', 'r')
       var_q = np.loadtxt(var_q_handle)
       var_q_handle.close()
-      
+
       # Check the shapes.
       if var_q.shape[0] != N:
         print 'The Q starting parameters have the wrong number of rows.'
-        raise IndexError        
+        raise IndexError
 
       if var_q.shape[1] != K:
         print 'The Q starting parameters have the wrong number of columns.'
-        raise IndexError        
+        raise IndexError
 
       if var_p.shape[0] != L:
         print 'The P starting parameters have the wrong number of rows.'
-        raise IndexError        
+        raise IndexError
 
       if var_p.shape[1] != 2 * K:
         print 'The P starting parameters have the wrong number of columns.'
-        raise IndexError        
+        raise IndexError
 
       psistart = ap.AdmixProp(N,K)
       pistart = af.AlleleFreq(L, K, prior)
@@ -93,7 +93,7 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
         for restart in xrange(5):
 
             # TODO: I think the indentation got screwed up here.
-            # if dataset is too large, initialize variational parameters 
+            # if dataset is too large, initialize variational parameters
             # using a random subset of the data (similar to a warm start).
             if batch_size<L:
 
@@ -183,6 +183,11 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
     itertime = time.time()
     reltol = np.inf
 
+    parameter_convergence = True
+
+    last_pi = pi.copy()
+    last_psi = psi.copy()
+
     print 'Starting optimization.\n'
     while np.abs(reltol)>mintol:
         # accelerated variational admixture proportion update
@@ -197,8 +202,22 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
         if (iter+1) % 10 ==0:
             print '----likelihood check'
             E_new = mlhood.marginal_likelihood(G, psi, pi)
-            reltol = E_new-E
+
+            if parameter_convergence:
+              pi_beta_diff = pi.var_beta - last_pi.var_beta
+              pi_gamma_diff = pi.var_gamma - last_pi.var_gamma
+              psi_var_diff = psi.var - last_psi.var
+              reltol = np.amax(np.abs(pi_beta_diff)) + \
+                       np.amax(np.abs(pi_gamma_diff)) + \
+                       np.amax(np.abs(psi_var_diff))
+              last_pi = pi.copy()
+              last_psi = psi.copy()
+              print '    Using parameters for convergence.  Reltol: %0.8f , lik diff %0.8f\n' % (reltol, E_new - E)
+            else:
+              reltol = E_new-E
+
             E = E_new
+
             itertime = time.time()-itertime
 
             handle = open('%s.%d.log'%(outfile,K),'a')
@@ -241,7 +260,7 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
 cdef double expected_genotype(ap.AdmixProp psi, af.AlleleFreq pi, int n, int l):
 
     """
-    compute the expected genotype of missing data, given observed genotypes, 
+    compute the expected genotype of missing data, given observed genotypes,
     after integrating out latent variables and model parameters using
     their variational distributions.
 
@@ -249,7 +268,7 @@ cdef double expected_genotype(ap.AdmixProp psi, af.AlleleFreq pi, int n, int l):
 
         psi : instance of `AdmixProp`
             variational distribution of admixture proprotions
-        
+
         pi : instance of `AlleleFreq`
             variational distribution of allele frequencies
 
@@ -303,13 +322,13 @@ cdef np.ndarray CV(np.ndarray[np.uint8_t, ndim=2] Gtrue, ap.AdmixProp psi, af.Al
 
     """
     compute the cross-validation error for a dataset, by computing the
-    model deviance on held-out subsets of the data. 
+    model deviance on held-out subsets of the data.
 
     Arguments:
 
         Gtrue : numpy.ndarray
             array of genotypes
-    
+
         psi : instance of `admixprop.AdmixProp`
             seed for variational admixture proportion parameters
 
@@ -333,7 +352,7 @@ cdef np.ndarray CV(np.ndarray[np.uint8_t, ndim=2] Gtrue, ap.AdmixProp psi, af.Al
         with the estimated parameters as the initial seed. This
         allows for fast parameter estimation. The prediction error
         for the held-out dataset is computed from the binomial deviance
-        of the held-out genotype entries, given the re-estimated 
+        of the held-out genotype entries, given the re-estimated
         variational parameters.
 
     """
