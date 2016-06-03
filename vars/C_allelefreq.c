@@ -29,10 +29,8 @@ void P_update_simple(const uint8_t* G, const double* zetabeta, const double* zet
         // loop over samples
         //printf("\nl,n,g,beta_sum,gamma_sum,zb1,zg1,zb2,zg2\n");
         for (n=0; n<N; n++) {
-	  //printf("%ld,", l);
-	  //printf("%ld,", n);
-            genotype = G[n * L + l];
-            //printf("%d,", genotype);
+	          genotype = G[n * L + l];
+            printf("\nP update:\nN = %ld, L = %ld, g = %d\n", n, l, genotype);
             // missing data do not contribute
             if (genotype!=3) {
 
@@ -45,6 +43,9 @@ void P_update_simple(const uint8_t* G, const double* zetabeta, const double* zet
                 // compute xi*zeta_{beta,gamma}
                 theta_beta_sum = 0.0;
                 theta_gamma_sum = 0.0;
+
+                // You could save computation and not compute the unused z term
+                // if g == 0  or g == 2
                 for (k=0; k<K; k++) {
 		    // In my notation:
 		    // theta_beta is the indicator that allele A is in population k.
@@ -67,11 +68,13 @@ void P_update_simple(const uint8_t* G, const double* zetabeta, const double* zet
                     var_gamma_tmp[k] += (double) (2 - genotype) * xi[n * K + k] / theta_gamma_sum;
 
                     idx = l * K + k;
-                    //printf("%f,", zetabeta[idx] * xi[n * K + k] / theta_beta_sum);
-                    //printf("%f,", zetagamma[idx] * xi[n * K + k] / theta_gamma_sum);
+                    printf("z_a[%d, %d, %d] = %f\n", n, l, k,
+                      zetabeta[idx] * xi[n * K + k] / theta_beta_sum);
+                    printf("z_b[%d, %d, %d] = %f\n", n, l, k,
+                      zetagamma[idx] * xi[n * K + k] / theta_gamma_sum);
                 }
             }
-            //printf("\n");
+            printf("\n");
         }
 
         // compute var_{beta,gamma}

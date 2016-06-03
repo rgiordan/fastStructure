@@ -3287,7 +3287,6 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_square_update(struct __pyx_
  * 
  *         self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))             # <<<<<<<<<<<<<<
  *         self.require()
- * 
  */
   __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 131, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
@@ -3427,7 +3426,6 @@ static PyObject *__pyx_f_4vars_9admixprop_9AdmixProp_square_update(struct __pyx_
  * 
  *         self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))
  *         self.require()             # <<<<<<<<<<<<<<
- * 
  */
   __pyx_t_1 = ((struct __pyx_vtabstruct_4vars_9admixprop_AdmixProp *)__pyx_v_self->__pyx_vtab)->require(__pyx_v_self); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 132, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

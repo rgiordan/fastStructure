@@ -16,7 +16,7 @@ cdef class AdmixProp:
 
         """
         Sets initial parameter values for the variational distributions over
-        admixture proportions. The prior over admixture proportions is set 
+        admixture proportions. The prior over admixture proportions is set
         to be a symmetric Dirichlet distribution with parameter 1/K.
         """
 
@@ -58,7 +58,7 @@ cdef class AdmixProp:
     cdef update(self, np.ndarray[np.uint8_t, ndim=2] G, af.AlleleFreq pi):
 
         """
-        Update parameters of variational distributions over 
+        Update parameters of variational distributions over
         admixture proportions, given genotype data and estimates
         of parameters of variational distributions over allele
         frequencies.
@@ -84,7 +84,7 @@ cdef class AdmixProp:
     cdef square_update(self, np.ndarray[np.uint8_t, ndim=2] G, af.AlleleFreq pi):
 
         """
-        Accelerated update of variational parameters of 
+        Accelerated update of variational parameters of
         admixture proportions.
 
         Arguments
@@ -130,4 +130,3 @@ cdef class AdmixProp:
 
         self.xi = np.exp(digamma(self.var)-digamma(utils.insum(self.var,[1])))
         self.require()
-
