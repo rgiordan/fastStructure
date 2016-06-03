@@ -29,11 +29,15 @@ void Q_update(const uint8_t* G, const double* zetabeta, const double* zetagamma,
 
                 // loop over populations
                 for (k=0; k<K; k++) {
-                    
+
                   // compute new estimate of variational parameters
-		  new_var[n*K+k] += (((double) (2-genotype) * zetagamma[l*K+k] / normgamma) + ((double) genotype * zetabeta[l*K+k] /  normbeta)) * xi[n*K + k];
-                }
-            }
-        }
-    }
+                  // Though strangely expressed, this is actually
+                  // E[Z_a] + E[Z_b]
+		  new_var[n*K+k] += (((double) (2-genotype) * zetagamma[l*K+k] / normgamma) + \
+                        ((double) genotype * zetabeta[l*K+k] / normbeta)) * xi[n*K + k];
+
+                } // k loop
+            } // data missing check
+        } // l loop
+    } // n loop
 }

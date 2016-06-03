@@ -74,7 +74,6 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
         raise IndexError
 
       psistart = ap.AdmixProp(N,K)
-      print '1'
       pistart = af.AlleleFreq(L, K, prior, prior_beta, prior_gamma)
 
       # Update pistart's necessary quantities.
@@ -82,15 +81,15 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
       pistart.var_beta = var_p[..., 0:K]
       pistart.var_gamma = var_p[..., K:(2 * K)]
       pistart.zetabeta = (np.exp(digamma(pistart.var_beta) -
-                          digamma(pistart.var_beta+pistart.var_gamma)))
+                                 digamma(pistart.var_beta + pistart.var_gamma)))
       pistart.zetagamma = (np.exp(digamma(pistart.var_gamma) -
-                           digamma(pistart.var_beta+pistart.var_gamma)))
+                                  digamma(pistart.var_beta + pistart.var_gamma)))
 
       # Update psistart's necessary quantities.
       # TODO: I think this should be in a method of AdmixProp.
       psistart.var = var_q
       psistart.xi = (np.exp(digamma(psistart.var) -
-                     digamma(utils.insum(psistart.var, [1]))))
+                            digamma(utils.insum(psistart.var, [1]))))
 
     else:
         for restart in xrange(5):
@@ -192,20 +191,19 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
     last_psi = psi.copy()
 
     print 'Starting optimization.\n'
+    if not accelerated:
+      print 'Skipping accelerated updates'
+
     while np.abs(reltol)>mintol:
         # accelerated variational admixture proportion update
         if accelerated:
           psi.square_update(G, pi)
-        else:
-          print 'Skipping accelerated updates'
 
         psi.update(G, pi)
 
         # accelerated variational allele frequency update
         if accelerated:
           pi.square_update(G, psi)
-        else:
-          print 'Skipping accelerated updates'
 
         pi.update(G, psi)
 
@@ -215,12 +213,17 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
             E_new = mlhood.marginal_likelihood(G, psi, pi)
 
             if parameter_convergence:
-              pi_beta_diff = pi.var_beta - last_pi.var_beta
-              pi_gamma_diff = pi.var_gamma - last_pi.var_gamma
-              psi_var_diff = psi.var - last_psi.var
-              reltol = np.amax(np.abs(pi_beta_diff)) + \
-                       np.amax(np.abs(pi_gamma_diff)) + \
-                       np.amax(np.abs(psi_var_diff))
+              # pi_beta_diff = pi.var_beta - last_pi.var_beta
+              # pi_gamma_diff = pi.var_gamma - last_pi.var_gamma
+              # psi_var_diff = psi.var - last_psi.var
+              # sum_abs_diff = np.sum(np.abs(pi_beta_diff)) + \
+              #          np.sum(np.abs(pi_gamma_diff)) + \
+              # reltol = np.amax(np.abs(pi_beta_diff)) + \
+              #          np.amax(np.abs(pi_gamma_diff)) + \
+              #          np.amax(np.abs(psi_var_diff))
+
+              # To match C++
+              reltol = np.sum(np.abs(psi.var - last_psi.var)) / (np.sum(np.abs(last_psi.var)) + mintol)
               last_pi = pi.copy()
               last_psi = psi.copy()
               print '    Using parameters for convergence.  Reltol: %0.16f , lik diff %0.16f\n' % (reltol, E_new - E)

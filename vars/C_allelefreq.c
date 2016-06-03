@@ -48,18 +48,18 @@ void P_update_simple(const uint8_t* G, const double* zetabeta, const double* zet
                 for (k=0; k<K; k++) {
 		    // In my notation:
 		    // theta_beta is the indicator that allele A is in population k.
-		    // theta_gamma is the indicator that allele A is in population k.
+		    // theta_gamma is the indicator that allele B is in population k.
 
                     theta_beta_sum += xi[n * K + k] * zetabeta[l * K + k];
                     theta_gamma_sum += xi[n * K + k] * zetagamma[l * K + k];
                 }
                 //printf("%f,", theta_beta_sum);
                 //printf("%f,", theta_gamma_sum);
- 
+
                 // increment var_{beta,gamma}_tmp
                 for (k=0; k<K; k++) {
 		  // genotype is either 0, 1, or 2.
-                  // If it is 2, both alleles count towards beta.  
+                  // If it is 2, both alleles count towards beta.
                   // If it is 0, both alleles count towards gamma.
                   // If it is 1, each allele gets one.
                   // Note that this is all multiplied by zetabeta and zetagamma below.
@@ -116,7 +116,7 @@ void P_update_logistic(const double* Dvarbeta, const double* Dvargamma, const do
         // loop over loci
         for (l=0; l<L; l++) {
 
-            // only update a locus, if all its variational parameters 
+            // only update a locus, if all its variational parameters
             // satisfy positivity constraints.
             update = 1;
             for (k=0; k<K; k++) {
