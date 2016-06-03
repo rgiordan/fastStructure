@@ -14,7 +14,8 @@ from scipy.special import digamma, gammaln, polygamma
 def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
                                  str outfile, double mintol, str prior,
                                  int cv, str starting_values_file,
-                                 double prior_beta, double prior_gamma):
+                                 double prior_beta, double prior_gamma,
+                                 bool accelerated):
 
     cdef int N, L, batch_size, restart, iter
     cdef double Estart, E, Enew, reltol, diff, totaltime, itertime
@@ -73,6 +74,7 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
         raise IndexError
 
       psistart = ap.AdmixProp(N,K)
+      print '1'
       pistart = af.AlleleFreq(L, K, prior, prior_beta, prior_gamma)
 
       # Update pistart's necessary quantities.
@@ -192,11 +194,19 @@ def infer_variational_parameters(np.ndarray[np.uint8_t, ndim=2] G, int K,
     print 'Starting optimization.\n'
     while np.abs(reltol)>mintol:
         # accelerated variational admixture proportion update
-        psi.square_update(G, pi)
+        if accelerated:
+          psi.square_update(G, pi)
+        else:
+          print 'Skipping accelerated updates'
+
         psi.update(G, pi)
 
-        # accelearted variational allele frequency update
-        pi.square_update(G, psi)
+        # accelerated variational allele frequency update
+        if accelerated:
+          pi.square_update(G, psi)
+        else:
+          print 'Skipping accelerated updates'
+
         pi.update(G, psi)
 
         # Compute marginal likelihood once every 10 iteration

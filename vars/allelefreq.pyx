@@ -15,7 +15,7 @@ cdef extern from "allelefreq.h":
 
 cdef class AlleleFreq:
 
-    def __cinit__(self, long L, long K, str prior, double prior_beta=1.0, double prior_gamma=1.0):
+    def __cinit__(self, long L, long K, str prior, double prior_beta, double prior_gamma):
 
         """
         Sets initial parameter values for the variational distributions over
@@ -25,6 +25,8 @@ cdef class AlleleFreq:
         self.L = L
         self.K = K
         self.prior = prior
+        self.prior_beta = prior_beta
+        self.prior_gamma = prior_gamma
         if self.prior=='simple':
             self.beta = np.full((self.L,self.K), prior_beta)
             self.gamma = np.full((self.L,self.K), prior_gamma)

@@ -26,7 +26,8 @@ def parseopts(opts):
             'prior_gamma': 1.0,
             'full': False,
             'format': 'bed',
-            'starting_values_file': ''
+            'starting_values_file': '',
+            'accelerated': True
             }
 
     for opt, arg in opts:
@@ -51,10 +52,18 @@ def parseopts(opts):
                 params['prior'] = 'simple'
 
         elif opt in ["--prior_beta"]:
-            params['prior_beta'] = arg
+            params['prior_beta'] = float(arg)
 
         elif opt in ["--prior_gamma"]:
-            params['prior_gamma'] = arg
+            params['prior_gamma'] = float(arg)
+
+        elif opt in ["--accelerated"]:
+            if arg.lower() == 'true':
+                params['accelerated'] = True
+            elif arg.lower() == 'false':
+                params['accelerated'] = False
+            else:
+                print '--accelerated must be True or False.  Defaulting to True.'
 
         elif opt in ["--format"]:
             params['format'] = arg
@@ -158,6 +167,7 @@ def usage():
     print "\t --full (to output all variational parameters; optional)"
     print "\t --seed=<int> (optional)"
     print "\t --starting_values_file=<file> (optional)"
+    print "\t --accelerated=<True or False> (default:True)"
 
 
 if __name__=="__main__":
@@ -167,7 +177,7 @@ if __name__=="__main__":
     smallflags = "K:"
     bigflags = ["prior=", "tol=", "input=", "output=", "cv=",
                 "seed=", "format=", "full", "starting_values_file=",
-                "prior_beta=", "prior_gamma="]
+                "prior_beta=", "prior_gamma=", "accelerated="]
     try:
         opts, args = getopt.getopt(argv, smallflags, bigflags)
         if not opts:
@@ -203,7 +213,8 @@ if __name__=="__main__":
     Q, P, other = fastStructure.infer_variational_parameters(G, params['K'], \
                     params['outputfile'], params['mintol'], \
                     params['prior'], params['cv'], params['starting_values_file'],
-                    params['prior_beta'], params['prior_gamma'])
+                    params['prior_beta'], params['prior_gamma'],
+                    params['accelerated'])
 
 
     # write out inferred parameters
