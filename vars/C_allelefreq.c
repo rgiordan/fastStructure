@@ -17,9 +17,9 @@ void P_update_simple(const uint8_t* G, const double* zetabeta, const double* zet
     var_beta_tmp = (double*) malloc(K * sizeof(double));
     var_gamma_tmp = (double*) malloc(K * sizeof(double));
 
+    //printf("\n----------- Beginning P_update_simple.\n");
     // loop over loci
     for (l=0; l<L; l++) {
-
         for (k=0; k<K; k++) {
 
             var_beta_tmp[k] = 0.0;
@@ -27,32 +27,57 @@ void P_update_simple(const uint8_t* G, const double* zetabeta, const double* zet
         }
 
         // loop over samples
+        //printf("\nl,n,g,beta_sum,gamma_sum,zb1,zg1,zb2,zg2\n");
         for (n=0; n<N; n++) {
-
-            genotype = G[n*L+l];
-
+	  //printf("%ld,", l);
+	  //printf("%ld,", n);
+            genotype = G[n * L + l];
+            //printf("%d,", genotype);
             // missing data do not contribute
             if (genotype!=3) {
 
+	        // Add across the components to compute the normalizing constant
+                // for the indicator variables.
+                // These are already exponentiated, so they are terms from exp(log likelihood).
+                //   xi: exp(E(log(probability of population k for individual n))
+                //   zetabeta: exp(E(log(probability of allele l for population k))
+                //
                 // compute xi*zeta_{beta,gamma}
                 theta_beta_sum = 0.0;
                 theta_gamma_sum = 0.0;
                 for (k=0; k<K; k++) {
-                    theta_beta_sum += xi[n*K+k] * zetabeta[l*K+k];
-                    theta_gamma_sum += xi[n*K+k] * zetagamma[l*K+k];
-                }
+		    // In my notation:
+		    // theta_beta is the indicator that allele A is in population k.
+		    // theta_gamma is the indicator that allele A is in population k.
 
+                    theta_beta_sum += xi[n * K + k] * zetabeta[l * K + k];
+                    theta_gamma_sum += xi[n * K + k] * zetagamma[l * K + k];
+                }
+                //printf("%f,", theta_beta_sum);
+                //printf("%f,", theta_gamma_sum);
+ 
                 // increment var_{beta,gamma}_tmp
                 for (k=0; k<K; k++) {
-                    var_beta_tmp[k] += (double) genotype * xi[n*K+k] / theta_beta_sum;
-                    var_gamma_tmp[k] += (double) (2-genotype) * xi[n*K+k] / theta_gamma_sum;
+		  // genotype is either 0, 1, or 2.
+                  // If it is 2, both alleles count towards beta.  
+                  // If it is 0, both alleles count towards gamma.
+                  // If it is 1, each allele gets one.
+                  // Note that this is all multiplied by zetabeta and zetagamma below.
+                    var_beta_tmp[k] += (double) genotype * xi[n * K + k] / theta_beta_sum;
+                    var_gamma_tmp[k] += (double) (2 - genotype) * xi[n * K + k] / theta_gamma_sum;
+
+                    idx = l * K + k;
+                    //printf("%f,", zetabeta[idx] * xi[n * K + k] / theta_beta_sum);
+                    //printf("%f,", zetagamma[idx] * xi[n * K + k] / theta_gamma_sum);
                 }
             }
+            //printf("\n");
         }
 
         // compute var_{beta,gamma}
         for (k=0; k<K; k++) {
-            idx = l*K+k;
+	  // The variables <beta> and <gamma> are the priors.
+            idx = l * K + k;
             var_beta[idx] = beta[idx] + zetabeta[idx] * var_beta_tmp[k];
             var_gamma[idx] = gamma[idx] + zetagamma[idx] * var_gamma_tmp[k];
         }
