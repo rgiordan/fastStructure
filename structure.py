@@ -23,7 +23,8 @@ def parseopts(opts):
             'prior': "simple",
             'cv': 0,
             'full': False,
-            'format': 'bed'
+            'format': 'bed',
+            'starting_values_file': ''
             }
 
     for opt, arg in opts:
@@ -36,6 +37,9 @@ def parseopts(opts):
 
         elif opt in ["--output"]:
             params['outputfile'] = arg
+
+        elif opt in ["--starting_values_file"]:
+            params['starting_values_file'] = arg
 
         elif opt in ["--prior"]:
             params['prior'] = arg
@@ -122,6 +126,10 @@ def write_output(Q, P, other, params):
             for pb,pg in zip(other['varPb'],other['varPg'])])+'\n')
         handle.close()
 
+        # handle = open('%s.%d.xi'%(params['outputfile'],params['K']),'w')
+        # handle.write('\n'.join(['  '.join(['%.6f'%i for i in q]) for q in other['xi']])+'\n')
+        # handle.close()
+
 def usage():
     
     """
@@ -139,6 +147,7 @@ def usage():
     print "\t --format={bed,str} (format of input file; default: bed)"
     print "\t --full (to output all variational parameters; optional)"
     print "\t --seed=<int> (manually specify seed for random number generator; optional)"
+    print "\t --starting_values_file=<file> (optional)"
 
 
 if __name__=="__main__":
@@ -146,7 +155,8 @@ if __name__=="__main__":
     # parse command-line options
     argv = sys.argv[1:]
     smallflags = "K:"
-    bigflags = ["prior=", "tol=", "input=", "output=", "cv=", "seed=", "format=", "full"] 
+    bigflags = ["prior=", "tol=", "input=", "output=", "cv=",
+                "seed=", "format=", "full", "starting_values_file="] 
     try:
         opts, args = getopt.getopt(argv, smallflags, bigflags)
         if not opts:
@@ -172,10 +182,18 @@ if __name__=="__main__":
         G = parse_str.load(params['inputfile'])
     G = np.require(G, dtype=np.uint8, requirements='C')
 
+    # Write the genome file for easy R wrangling.  Eventually I should
+    # figure out what's going on with the .bim file format.
+    handle = open('%s.%d.genome' % (params['outputfile'], params['K']), 'w')
+    handle.write('\n'.join(['  '.join(['%d' % i for i in g]) for g in G])+'\n')
+    handle.close()
+
     # run the variational algorithm
     Q, P, other = fastStructure.infer_variational_parameters(G, params['K'], \
                     params['outputfile'], params['mintol'], \
-                    params['prior'], params['cv'])
+                    params['prior'], params['cv'], params['starting_values_file'])
+
 
     # write out inferred parameters
     write_output(Q, P, other, params)
+
